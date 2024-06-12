@@ -1,19 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CircleScript : MonoBehaviour
+public class CircleScript : ShapeScript
 {
-
-
-    void Start()
+    public override int MyNumber()
     {
-        
+        return 0;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

@@ -1,18 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class TriangleScript : MonoBehaviour
+public class TriangleScript : ShapeScript
 {
-    // Start is called before the first frame update
-    void Start()
+    public override int MyNumber()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return 1;
     }
 }
