@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6665166023699546073}
   m_Layer: 0
   m_Name: Square L
-  m_TagString: Shape
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7b6bd946164cff47a0d6f23c35cad22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  floor: -1
+  pileNumber: -1
 --- !u!1001 &1236645778048447826
 PrefabInstance:
   m_ObjectHideFlags: 0

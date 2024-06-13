@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7170396780078067816}
   m_Layer: 0
   m_Name: Circle M
-  m_TagString: Shape
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8690ff390ec04b04796c9d44ede25400, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  floor: -1
+  pileNumber: -1
 --- !u!1001 &3884031342238701038
 PrefabInstance:
   m_ObjectHideFlags: 0

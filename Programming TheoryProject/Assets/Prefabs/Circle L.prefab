@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7389789660200373502}
   m_Layer: 0
   m_Name: Circle L
-  m_TagString: Shape
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8690ff390ec04b04796c9d44ede25400, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  floor: -1
+  pileNumber: -1
 --- !u!1001 &3044951222521753546
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57,6 +59,10 @@ PrefabInstance:
     - target: {fileID: 1639964887756759779, guid: 36f1c5756dd7af5499d152ae2d2c4b10, type: 3}
       propertyPath: m_Name
       value: Circle Shape
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639964887756759779, guid: 36f1c5756dd7af5499d152ae2d2c4b10, type: 3}
+      propertyPath: m_TagString
+      value: Shape
       objectReference: {fileID: 0}
     - target: {fileID: 3597651185359331620, guid: 36f1c5756dd7af5499d152ae2d2c4b10, type: 3}
       propertyPath: m_LocalPosition.x
@@ -120,6 +126,10 @@ PrefabInstance:
     - target: {fileID: 1639964887756759779, guid: 36f1c5756dd7af5499d152ae2d2c4b10, type: 3}
       propertyPath: m_Name
       value: Frame
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639964887756759779, guid: 36f1c5756dd7af5499d152ae2d2c4b10, type: 3}
+      propertyPath: m_TagString
+      value: Shape
       objectReference: {fileID: 0}
     - target: {fileID: 3597651185359331620, guid: 36f1c5756dd7af5499d152ae2d2c4b10, type: 3}
       propertyPath: m_LocalScale.x

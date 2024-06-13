@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.ProBuilder.Shapes;
@@ -18,8 +20,6 @@ public class MainManager : MonoBehaviour
     private List<Vector3> pilePositions = new List<Vector3>();
     private List<List<GameObject>> pileObjs = new List<List<GameObject>>();
 
-    private Vector3 CenterPosition = new Vector3(0, 0, 1.8f);
-    private Vector3 RightPosition = new Vector3(3.3f, 0, -1.87f);
     private Ray ray;
     private RaycastHit hit;
 
@@ -28,22 +28,25 @@ public class MainManager : MonoBehaviour
 
     private List<GameObject> selectedPile = null;
 
-    void SetPositionHeight(int index)
+    void SetPositionForFloor(int floor)
     {
-        for(int i = 0;i<pilePositions.Count;i++)
+        float val = (float)(floor);
+        float y = val * 0.01f;
+        for (int i = 0;i<pilePositions.Count;i++)
         {
             float x = pilePositions[i].x;
             float z = pilePositions[i].z;
-            pilePositions[i] = new Vector3(x, (float)(index) * 0.01f, z);
+            pilePositions[i] = new Vector3(x, y, z);
         }
     }
 
     void SetPilePositions()
     {
-        pilePositions.Add(new Vector3(-2f, 0, 1.87f));
-        pilePositions.Add(new Vector3(3.3f, 0, 1.87f));
-        pilePositions.Add(new Vector3(-2f, 0, -1.87f));
-        pilePositions.Add(new Vector3(3.3f, 0, -1.87f));
+        pilePositions.Add(new Vector3(-2f, 0, 1.93f));
+        pilePositions.Add(new Vector3(3.3f, 0, 1.93f));
+        pilePositions.Add(new Vector3(-2f, 0, -1.93f));
+        pilePositions.Add(new Vector3(3.3f, 0, -1.93f));
+
         pileObjs = new List<List<GameObject>>();
         for (int j = 0; j < pilePositions.Count; j++)
         {
@@ -57,12 +60,22 @@ public class MainManager : MonoBehaviour
         for (int i = 0; i < numFloors; i++)
         {
             List<GameObject> shapes = GetShapesBySize(i);
-            SetPositionHeight(i);
-
+            SetPositionForFloor(i);
             for (int j = 0; j < pilePositions.Count; j++)
             {
-                int index = Random.Range(0, nShapes);
-                GameObject gameObject = Instantiate(shapes[index], pilePositions[j], shapes[index].transform.rotation);
+                Vector3 pileCenter = pilePositions[j];
+                int index = UnityEngine.Random.Range(0, nShapes);
+                GameObject gameObject = Instantiate(shapes[index], pileCenter, shapes[index].transform.rotation);
+                ShapeScript shapeScript = gameObject.GetComponent<ShapeScript>();
+                shapeScript.Floor = i;
+                shapeScript.PileNumber = j;
+                if (i > 0)
+                {
+                    shapeScript.LowerScript = pileObjs[j][i - 1].GetComponent<ShapeScript>();
+                    Vector3 floorCenter = shapeScript.LowerScript.CenterForNextFloor(pileCenter);
+                    gameObject.transform.position = floorCenter;
+                }
+
                 pileObjs[j].Add(gameObject);
             }
         }
@@ -92,14 +105,8 @@ public class MainManager : MonoBehaviour
             {
                 if (hit.collider.CompareTag("Shape"))
                 {
-                    if (selectedPile == null)
-                    {
-                        HighlightPile(hit.collider.transform.position);
-                    }
-                    else
-                    { 
-                        MatchPiles(hit.collider.transform.position);
-                    }
+                    ShapeScript shapeScript = hit.collider.gameObject.transform.parent.GetComponent<ShapeScript>();
+                    PileWasSelected(shapeScript.PileNumber);
                 }
                 else
                 {
@@ -114,10 +121,36 @@ public class MainManager : MonoBehaviour
     }
 
 
-    void MatchPiles(Vector3 position)
+    void PileWasSelected(int pileNumber) 
     {
+        if (selectedPile == null)
+        {
+            HighlightPile(pileObjs[pileNumber]);
+            selectedPile = pileObjs[pileNumber];
+        }
+        else
+        {
+            MatchPiles(pileObjs[pileNumber]);
+        }
+    }
 
-        List<GameObject> newSelectedPile = FindSelectedPile(position);
+    void HighlightPile(List<GameObject> newSelectedPile) 
+    {
+        int numFloors = 3;
+        for (int i = 0; i < numFloors; i++)
+        {
+            GameObject frameObject = newSelectedPile[i].transform.Find("Frame").gameObject;
+            frameObject.GetComponent<Renderer>().material = goldMaterial;
+        }
+
+    }
+
+    void MatchPiles(List<GameObject> newSelectedPile)
+    {
+        if (newSelectedPile == null)
+        {
+            return;
+        }
         if (newSelectedPile != selectedPile)
         {
             for (int i = 0; i < numFloors; ++i)
@@ -125,57 +158,30 @@ public class MainManager : MonoBehaviour
                 int number1 = selectedPile[i].GetComponent<ShapeScript>().MyNumber();
                 int number2 = newSelectedPile[i].GetComponent<ShapeScript>().MyNumber();
                 int newIndex = (number1 + number2) % 3;
+                SetPositionForFloor(i);
 
                 List<GameObject> shapes = GetShapesBySize(i);
 
+                ShapeScript oldScript = newSelectedPile[i].GetComponent<ShapeScript>();
+                int pileNumber = oldScript.PileNumber;
+                Vector3 pileCenter = pilePositions[pileNumber];
+                GameObject newShape = Instantiate(shapes[newIndex], pileCenter, shapes[newIndex].transform.rotation);
+                ShapeScript newScript = newShape.GetComponent<ShapeScript>();
+                newScript.Floor = i;
+                newScript.PileNumber = pileNumber;
+                if (i > 0)
+                {
+                    newScript.LowerScript = newSelectedPile[i-1].GetComponent<ShapeScript>();
+                    Debug.Log("NEW FLOOR " + i.ToString());
+                    Vector3 floorCenter = newScript.LowerScript.CenterForNextFloor(pileCenter);
+                    newShape.transform.position = floorCenter;
+                }
+
                 Destroy(newSelectedPile[i]);
-                newSelectedPile[i] = Instantiate(shapes[newIndex], newSelectedPile[i].transform.position, shapes[newIndex].transform.rotation);
+                newSelectedPile[i] = newShape;
             }
         }
         ResetSelection();
-    }
-
-    List<GameObject> GetShapesBySize(int index)
-    {
-        switch (index)
-        {
-            case 0:
-                return bigShapes;
-            case 1:
-                return mediumShapes;
-            case 2:
-                return smallShapes;
-            default:
-                return bigShapes;
-        }
-    }
-
-    List<GameObject> FindSelectedPile(Vector3 position)
-    {
-        List<GameObject> pile = pileObjs[0];
-        float minDistance = (position - pilePositions[0]).magnitude;
-        for (int i = 1; i<pilePositions.Count; ++i)
-        { 
-            float distance = (position - pilePositions[i]).magnitude;
-            if (minDistance > distance)
-            {
-                minDistance = distance;
-                pile = pileObjs[i];
-            }
-        }
-        return pile;
-    }
-
-    void HighlightPile(Vector3 position) 
-    {
-        selectedPile = FindSelectedPile(position);
-        int numFloors = 3;
-        for (int i = 0; i < numFloors; i++)
-        {
-            GameObject frameObject = selectedPile[i].transform.Find("Frame").gameObject;
-            frameObject.GetComponent<Renderer>().material = goldMaterial;
-        }
-
     }
 
     void ResetSelection()
@@ -197,5 +203,21 @@ public class MainManager : MonoBehaviour
         }
 
     }
+
+    List<GameObject> GetShapesBySize(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return bigShapes;
+            case 1:
+                return mediumShapes;
+            case 2:
+                return smallShapes;
+            default:
+                return bigShapes;
+        }
+    }
+
 
 }
